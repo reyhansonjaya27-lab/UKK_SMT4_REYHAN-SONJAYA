@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UKK SMT4
 
-## Getting Started
+## Setup setelah clone (Windows PowerShell)
 
-First, run the development server:
+1. Install dependency:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   ```powershell
+   npm.cmd install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Salin template environment lalu isi koneksi database dan rahasia lokal:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```powershell
+   Copy-Item .env.example .env
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   Isi `DATABASE_URL` dengan koneksi MariaDB/MySQL, `ADMIN_PASSWORD` dengan password admin minimal 8 karakter, dan `JWT_SECRET` dengan nilai acak minimal 32 byte. Buat nilai `JWT_SECRET` dengan:
 
-## Learn More
+   ```powershell
+   node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. Buat database kosong bernama `db_ukksmt4_reyhan` pada server MariaDB/MySQL.
+4. Terapkan skema tabel dan buat akun admin:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```powershell
+   npm.cmd run db:migrate
+   npm.cmd run db:seed-admin
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+5. Jalankan aplikasi:
 
-## Deploy on Vercel
+   ```powershell
+   npm.cmd run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Buka `http://localhost:3000` dan masuk menggunakan email `reyhansonjaya27@gmail.com` serta password yang Anda isi pada `ADMIN_PASSWORD`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Migrasi menyiapkan struktur tabel; seed membuat akun admin saja. Artikel, kategori, jurusan, dan profil perusahaan tidak ikut tersalin dan dapat ditambahkan melalui aplikasi. Jangan commit `.env` atau kredensial database ke GitHub.
