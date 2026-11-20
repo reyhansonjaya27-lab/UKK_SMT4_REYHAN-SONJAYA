@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
-  SquareUser,
   UsersRound,
 } from "lucide-react";
 import Image from "next/image";
@@ -67,17 +66,6 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                {/* Pengaturan */}
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                  >
-                    <Link href="/admin/profile">
-                      <SquareUser className="w-4 h-4 mr-2" />
-                      <span>Profile</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

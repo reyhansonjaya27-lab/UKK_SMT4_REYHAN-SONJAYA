@@ -48,6 +48,30 @@ function isEditableUserResponse(
   )
 }
 
+function isCreatedUserResponse(result: unknown): result is { user: { id: number } } {
+  if (typeof result !== "object" || result === null || !("user" in result)) return false
+  const user = result.user
+  return (
+    typeof user === "object" &&
+    user !== null &&
+    "id" in user &&
+    typeof user.id === "number" &&
+    Number.isSafeInteger(user.id) &&
+    user.id > 0
+  )
+}
+
+function isNextUserNumberResponse(result: unknown): result is { nextId: number } {
+  return (
+    typeof result === "object" &&
+    result !== null &&
+    "nextId" in result &&
+    typeof result.nextId === "number" &&
+    Number.isSafeInteger(result.nextId) &&
+    result.nextId > 0
+  )
+}
+
 export function UserForm({ userId }: { userId: string }) {
   const router = useRouter()
   const isNewUser = userId === "add"
@@ -60,6 +84,10 @@ export function UserForm({ userId }: { userId: string }) {
   const [isLoading, setIsLoading] = useState(!isNewUser)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
+  const [createdUserId, setCreatedUserId] = useState<number | null>(null)
+  const [nextUserNumber, setNextUserNumber] = useState<number | null>(null)
+  const [isLoadingNumber, setIsLoadingNumber] = useState(isNewUser)
+  const [numberError, setNumberError] = useState("")
 
   useEffect(() => {
     if (isNewUser) return
@@ -87,6 +115,34 @@ export function UserForm({ userId }: { userId: string }) {
     }
   }, [isNewUser, userId])
 
+  useEffect(() => {
+    if (!isNewUser) return
+
+    let active = true
+    void fetch("/api/users/next-id")
+      .then(readJson)
+      .then((result) => {
+        if (!isNextUserNumberResponse(result)) {
+          throw new Error("Respons API tidak menyertakan nomor user yang valid.")
+        }
+        if (active) setNextUserNumber(result.nextId)
+      })
+      .catch((loadError: unknown) => {
+        if (active) {
+          setNumberError(
+            loadError instanceof Error ? loadError.message : "Gagal memuat nomor user.",
+          )
+        }
+      })
+      .finally(() => {
+        if (active) setIsLoadingNumber(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [isNewUser])
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError("")
@@ -101,7 +157,15 @@ export function UserForm({ userId }: { userId: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       })
-      await readJson(response)
+      const result = await readJson(response)
+      if (isNewUser) {
+        if (!isCreatedUserResponse(result)) {
+          throw new Error("Respons API tidak menyertakan ID user yang valid.")
+        }
+        setCreatedUserId(result.user.id)
+        return
+      }
+
       router.push("/admin/usermanagement")
       router.refresh()
     } catch (saveError) {
@@ -115,9 +179,47 @@ export function UserForm({ userId }: { userId: string }) {
     return <Card className="p-6">Memuat data user...</Card>
   }
 
+  if (createdUserId !== null) {
+    return (
+      <Card className="max-w-xl space-y-4 p-6">
+        <div role="status">
+          <h2 className="text-lg font-semibold">User berhasil ditambahkan.</h2>
+          <p className="mt-2">ID User: <strong>{createdUserId}</strong></p>
+        </div>
+        <Button type="button" onClick={() => router.push("/admin/usermanagement")}>
+          Kembali ke daftar user
+        </Button>
+      </Card>
+    )
+  }
+
   return (
     <Card className="max-w-xl p-6">
       <form className="space-y-4" onSubmit={handleSubmit}>
+        {isNewUser && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="next-user-number">
+              Nomor otomatis (perkiraan)
+            </label>
+            <input
+              id="next-user-number"
+              className="w-full rounded-md border bg-muted px-3 py-2"
+              readOnly
+              value={
+                isLoadingNumber
+                  ? "Memuat nomor..."
+                  : nextUserNumber ?? "Tidak tersedia"
+              }
+              aria-describedby="next-user-number-help"
+            />
+            <p id="next-user-number-help" className="text-xs text-muted-foreground">
+              Nomor final ditentukan database saat user disimpan.
+            </p>
+            {numberError && (
+              <p role="alert" className="text-sm text-destructive">{numberError}</p>
+            )}
+          </div>
+        )}
         <div className="space-y-2">
           <label className="text-sm font-medium" htmlFor="fullname">Nama lengkap</label>
           <input
