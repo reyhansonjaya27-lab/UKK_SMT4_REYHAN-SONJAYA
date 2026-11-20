@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:migrate": "prisma migrate deploy",
+    "db:migrate": "prisma migrate deploy && npm run db:seed-admin",
     "db:seed-admin": "node prisma/seed-admin.mjs",
     "postinstall": "prisma generate"
   },

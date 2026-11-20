@@ -21,12 +21,13 @@
    ```
 
 3. Buat database kosong bernama `db_ukksmt4_reyhan` pada server MariaDB/MySQL.
-4. Terapkan skema tabel dan buat akun admin:
+4. Terapkan skema tabel dan buat akun admin `reyhan@gmail.com`:
 
    ```powershell
    npm.cmd run db:migrate
-   npm.cmd run db:seed-admin
    ```
+
+   Perintah ini memakai `ADMIN_PASSWORD` dari `.env`. Password harus minimal 8 karakter. Jika akun sudah ada, seed tidak mengganti password atau role yang tersimpan.
 
 5. Jalankan aplikasi:
 
@@ -34,6 +35,6 @@
    npm.cmd run dev
    ```
 
-Buka `http://localhost:3000` dan masuk menggunakan email `reyhansonjaya27@gmail.com` serta password yang Anda isi pada `ADMIN_PASSWORD`.
+Buka `http://localhost:3000` dan masuk menggunakan email `reyhan@gmail.com` serta password yang Anda isi pada `ADMIN_PASSWORD`.
 
 Migrasi menyiapkan struktur tabel; seed membuat akun admin saja. Artikel, kategori, jurusan, dan profil perusahaan tidak ikut tersalin dan dapat ditambahkan melalui aplikasi. Jangan commit `.env` atau kredensial database ke GitHub.

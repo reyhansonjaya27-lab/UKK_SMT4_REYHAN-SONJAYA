@@ -36,14 +36,11 @@ try {
     `INSERT INTO users (fullname, email, password, role, updated_at)
      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP(3))
      ON DUPLICATE KEY UPDATE
-       fullname = VALUES(fullname),
-       password = VALUES(password),
-       role = VALUES(role),
-       updated_at = CURRENT_TIMESTAMP(3)`,
-    ["reyhan", "reyhansonjaya27@gmail.com", passwordHash, "admin"],
+       id = LAST_INSERT_ID(id)`,
+    ["reyhan", "reyhan@gmail.com", passwordHash, "admin"],
   )
 
-  console.log("Admin account is ready for reyhansonjaya27@gmail.com.")
+  console.log("Admin account is ready for reyhan@gmail.com.")
 } finally {
   await connection.end()
 }
